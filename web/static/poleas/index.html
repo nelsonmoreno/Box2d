@@ -1,19 +1,18 @@
-
 <!DOCTYPE html>
-
 <html>
 <head>
     <meta charset="utf-8">
     <title>Box2D Javascript Fun : 00 : Most Basic Box2D Example</title>
-    <link rel="author" href="http://profiles.google.com/sethladd">
     <script src="../Box2d.min.js"></script>
 </head>
 <body>
-<h1>Box2d / Movimiento Circular</h1>
-<p><a href="index.html" >GitHub wiki</a> - <a href="index.html" >GitHub sources</a></p>
+<h1>Box2d / Primeros pasos</h1>
+<p><a href="https://github.com/nelsonmoreno/box2d/wiki/4.-Empalmes-(joints)" >GitHub wiki</a> - <a href="https://github.com/nelsonmoreno/box2d/tree/master/web/static/simulacion/index.html" >GitHub sources</a></p>
 <canvas id="c" width="640" height="480" style="border: 1px solid black"></canvas>
 
 <script>
+
+
     // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
     window.requestAnimFrame = (function(){
         return  window.requestAnimationFrame       ||
@@ -26,13 +25,8 @@
                 };
     })();
 
-    /*var stats = new Stats();
-     document.body.appendChild(stats.domElement);
-     */
-
     var canvas = document.getElementById("c");
     var ctx = canvas.getContext("2d");
-
     var world;
 
     function init() {
@@ -46,7 +40,7 @@
                 , b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape
                 , b2CircleShape = Box2D.Collision.Shapes.b2CircleShape
                 , b2DebugDraw = Box2D.Dynamics.b2DebugDraw
-                , b2RevoluteJointDef = Box2D.Dynamics.Joints.b2RevoluteJointDef
+                , b2PulleyJointDef = Box2D.Dynamics.Joints.b2PulleyJointDef
                 ;
 
         world = new b2World(
@@ -67,91 +61,64 @@
         bodyDef.type = b2Body.b2_staticBody;
 
         // positions the center of the object (not upper left!)
-        bodyDef.position.x = (canvas.width / 2 / SCALE);
+        bodyDef.position.x = canvas.width / 2 / SCALE;
         bodyDef.position.y = (canvas.height / SCALE) - 1;
 
         fixDef.shape = new b2PolygonShape;
 
         // half width, half height. eg actual height here is 1 unit
-        fixDef.shape.SetAsBox(((canvas.width / SCALE)/2) , 0.5 / 2);
-
-        ctx.rotate(6);
-
+        fixDef.shape.SetAsBox((canvas.width / SCALE) / 2, 0.5 / 2);
         world.CreateBody(bodyDef).CreateFixture(fixDef);
 
-        ctx.restore();
 
 
-        //create dynamic first well
-        bodyDef.type = b2Body.b2_dynamicBody;
-        fixDef.shape = new b2CircleShape(
-                1 //radius
-        );
-        bodyDef.position.x = 1.5;
-        bodyDef.position.y = 10;
-        var wellBody1 = world.CreateBody(bodyDef);
-        wellBody1.CreateFixture(fixDef);
 
-
-        //create dynamic second well
-        bodyDef.type = b2Body.b2_dynamicBody;
-        fixDef.shape = new b2CircleShape(
-                0.5 //radius
-        );
-        bodyDef.position.x = 5;
-        bodyDef.position.y = 10;
-        var wellBody2 = world.CreateBody(bodyDef);
-        wellBody2.CreateFixture(fixDef);
-
-
-        // create dynamic polygon object
+        //create first body box
         bodyDef.type = b2Body.b2_dynamicBody;
         fixDef.shape = new b2PolygonShape;
         fixDef.shape.SetAsBox(
-                2.5//half width
-                ,  0.2 //half height
+                1 //half width
+                , 1 //half height
         );
-        bodyDef.position.x = 3;
-        bodyDef.position.y = 10;
-        var boxBody = world.CreateBody(bodyDef);
-        boxBody.CreateFixture(fixDef);
+        //at this point
+        bodyDef.position.x = 5;
+        bodyDef.position.y = (canvas.height / SCALE) - 3.3;
+
+        var firstBox = world.CreateBody(bodyDef);
+        firstBox.CreateFixture(fixDef);
 
 
-        var joint = new b2RevoluteJointDef();
-        joint.Initialize(wellBody1, boxBody, wellBody1.GetWorldCenter());
-        joint.motorSpeed = -3;
-        joint.maxMotorTorque = 30;
-        joint.enableMotor = true;
-        this.world.CreateJoint(joint);
-
-        var joint = new b2RevoluteJointDef();
-        joint.Initialize(wellBody2, boxBody, wellBody2.GetWorldCenter());
-        joint.motorSpeed = -3;
-        joint.maxMotorTorque = 30;
-        joint.enableMotor = true;
-        this.world.CreateJoint(joint);
-
-//pol
-
+        //create second body box
         bodyDef.type = b2Body.b2_dynamicBody;
         fixDef.shape = new b2PolygonShape;
+        fixDef.density = 1.5;
+        fixDef.shape.SetAsBox(
+                1 //half width
+                , 2 //half height
+        );
+        //at this point
+        bodyDef.position.x = 15;
+        bodyDef.position.y = (canvas.height / SCALE) - 8;
 
-        var despoints = [{x: 0, y: 0}, {x: 0, y: 3.9}, {x: -7, y:2}];
-        var points = [];
+        var secondBox = world.CreateBody(bodyDef);
+        secondBox.CreateFixture(fixDef);
 
-        for (var i = 0; i < despoints.length; i++) {
-            var vec = new b2Vec2();
-            vec.Set(despoints[i].x, despoints[i].y);
-            points[i] = vec;
-        }
 
-        fixDef.shape.SetAsArray(points, points.length);
+        //create pulley joint
+        var joint = new b2PulleyJointDef();
 
-        bodyDef.position.x = 16;
-        bodyDef.position.y = 10;
-        world.CreateBody(bodyDef).CreateFixture(fixDef);
 
-//pol
+        var anchor1 = new b2Vec2(5, 11.7);
+        var anchor2 = new b2Vec2(15, 6);
+        var groundAnchor1 = new b2Vec2(5, 2 );
+        var groundAnchor2 = new b2Vec2(15, 2);
+
+        joint.Initialize(firstBox, secondBox, groundAnchor1, groundAnchor2, anchor1, anchor2, 1.5);
+
+
+        this.world.CreateJoint(joint);
+
+
 
         //setup debug draw
         var debugDraw = new b2DebugDraw();
@@ -162,8 +129,6 @@
         debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
         world.SetDebugDraw(debugDraw);
 
-        // restart
-        //setTimeout(init, 3000);
     }; // init()
 
     function update() {
@@ -183,11 +148,5 @@
 
 </script>
 
-<br><br>
-<!--form><input id="b1" type="button" value="LANZAR" onclick="init();"/></1--form-->
 </body>
 </html>
-
- 
- 
- 
