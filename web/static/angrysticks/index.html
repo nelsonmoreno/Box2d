@@ -72,10 +72,7 @@
             // console.log(contact.GetFixtureA().GetBody().GetUserData());
         }
         listener.PostSolve = function(contact, impulse) {
-            if(null!=contact.GetFixtureA().GetBody().GetUserData()){
-                console.log("User data="+contact.GetFixtureA().GetBody().GetUserData());
-                console.log("ffff="+contact.GetFixtureA().GetBody().GetUserData().indexOf("stick"));
-            }
+
             if(null!=contact.GetFixtureA().GetBody().GetUserData()&&contact.GetFixtureA().GetBody().GetUserData().indexOf("stick")>0){
 
                 if(impulse.normalImpulses[0]>0.3){
